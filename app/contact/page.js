@@ -72,7 +72,7 @@ export default function ContactForm() {
                   Message*
                 </Label>
                 <Textarea
-                  placeholder="Type your message here"
+                  placeholder="Écrivez votre message ici ou envoyez-moi un e-mail indiqué dans le footer."
                   className="min-h-24 bg-[#a37b7360] text-xs placeholder:text-zinc-600/60 font-['Lato']"
                   value={form.message}
                   onChange={e => setForm(f => ({ ...f, message: e.target.value }))}

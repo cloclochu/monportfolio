@@ -87,7 +87,7 @@ export default function RoyalAuffrevillePage() {
         <Accordion type="single" collapsible className="w-full">
           {accordionData.map(item => (
             <AccordionItem key={item.value} value={item.value} className="border-b bg-transparent">
-              <AccordionTrigger className="text-2xl font-bold tracking-widest text-[#2D2323]">
+              <AccordionTrigger className="text-2xl font-bold tracking-wide text-[#2D2323]">
                 {item.title}
               </AccordionTrigger>
               <AccordionContent className="font-['Libre_Baskerville'] text-xl text-[#2D2323] bg-transparent">

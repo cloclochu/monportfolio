@@ -22,7 +22,7 @@ export default function HomePage() {
   const navItems = [
     { label: "Projets", href: "/projet" },
     { label: "A Propos", href: "/APropos" },
-    { label: "CV", href: "/CV"},
+    { label: "CV", href: "/CV", download: true },
     { label: "Contact", href: "/contact" },
   ];
 
