@@ -60,21 +60,6 @@ export default function HomePage() {
       <div className="my-32" /> {/* 专业且灵活的空隙，数值可调 */}
       <Footer />
 
-      {/* Navigation Menu - Optional */}
-      <nav>
-        {navItems.map((item, idx) =>
-          item.download ? (
-            <a key={idx} href={item.href} download>
-              {item.label}
-            </a>
-          ) : (
-            <Link key={idx} href={item.href}>
-              {item.label}
-            </Link>
-          )
-        )}
-      </nav>
-
       {/* Google Fonts - Optional */}
       <link
         href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&display=swap"

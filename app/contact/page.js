@@ -15,9 +15,82 @@ export default function ContactForm() {
     message: "",
   });
   const [aiQuestion, setAiQuestion] = useState(""); // 新增AI输入内容
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitMessage, setSubmitMessage] = useState("");
+  const [errors, setErrors] = useState({
+    name: "",
+    contact: "",
+    message: "",
+  });
+
+  // 校验函数
+  const validateName = (name) => {
+    if (!name) return "";
+    if (!/^[A-Za-zÀ-ÖØ-öø-ÿ\s'-]+$/.test(name)) {
+      return "Le nom ne doit contenir que des lettres.";
+    }
+    return "";
+  };
+
+  const validateContact = (contact) => {
+    if (!contact) return "";
+    const emailRegex = /^[\w-.]+@[\w-]+\.[a-zA-Z]{2,}$/;
+    const phoneRegex = /^\+?[\d\s\-\(\)\.]{7,15}$/;
+    if (!emailRegex.test(contact) && !phoneRegex.test(contact)) {
+      return "Veuillez entrer un e-mail ou un numéro de téléphone valide.";
+    }
+    return "";
+  };
+
+  const validateMessage = (message) => {
+    if (!message) return "";
+    if (message.length > 1200) {
+      return "Le message ne doit pas dépasser 1200 caractères.";
+    }
+    return "";
+  };
+
+  const isFormValid = () => {
+    return form.name && form.contact && form.message && 
+           !errors.name && !errors.contact && !errors.message;
+  };
 
   const isFilled = form.name && form.contact && form.message;
   const isAiFilled = aiQuestion.trim().length > 0; // 判断AI输入是否有内容
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!isFormValid()) {
+      setSubmitMessage("Veuillez corriger les erreurs ci-dessus.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    setSubmitMessage("");
+
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(form),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setSubmitMessage("Merci pour votre message ! Je vous répondrai dans les plus brefs délais.");
+        setForm({ name: "", contact: "", message: "" });
+      } else {
+        setSubmitMessage("Erreur lors de l'envoi du message. Veuillez réessayer.");
+      }
+    } catch (error) {
+      setSubmitMessage("Erreur lors de l'envoi du message. Veuillez réessayer.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <>
@@ -39,7 +112,7 @@ export default function ContactForm() {
             </TabsTrigger>
           </TabsList>
           <TabsContent value="ecrivez">
-            <div className="flex flex-col gap-6">
+            <form onSubmit={handleSubmit} className="flex flex-col gap-6">
               {/* Nom */}
               <div className="flex flex-col gap-1.5">
                 <Label className="text-xs font-['Libre_Baskerville'] text-slate-900 leading-tight tracking-tight">
@@ -48,10 +121,20 @@ export default function ContactForm() {
                 <Input
                   type="text"
                   placeholder="Nom et/ou prénom"
-                  className="bg-[#a37b7360] text-xs placeholder:text-slate-900/50 font-['Lato']"
+                  className="bg-[#a37b7360] text-xs placeholder:text-slate-900/50 font-['Libre_Baskerville']"
                   value={form.name}
-                  onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+                  onChange={e => {
+                    const value = e.target.value;
+                    setForm(f => ({ ...f, name: value }));
+                    setErrors(prev => ({ ...prev, name: validateName(value) }));
+                  }}
+                  maxLength={50}
                 />
+                {errors.name && (
+                  <span className="text-xs text-red-600 font-['Libre_Baskerville']">
+                    {errors.name}
+                  </span>
+                )}
               </div>
               {/* Coordonnée */}
               <div className="flex flex-col gap-1.5">
@@ -61,35 +144,65 @@ export default function ContactForm() {
                 <Input
                   type="text"
                   placeholder="E-mail ou téléphone"
-                  className="bg-[#a37b7360] text-xs placeholder:text-slate-900/50 font-['Lato']"
+                  className="bg-[#a37b7360] text-xs placeholder:text-slate-900/50 font-['Libre_Baskerville']"
                   value={form.contact}
-                  onChange={e => setForm(f => ({ ...f, contact: e.target.value }))}
+                  onChange={e => {
+                    const value = e.target.value;
+                    setForm(f => ({ ...f, contact: value }));
+                    setErrors(prev => ({ ...prev, contact: validateContact(value) }));
+                  }}
+                  maxLength={50}
                 />
+                {errors.contact && (
+                  <span className="text-xs text-red-600 font-['Libre_Baskerville']">
+                    {errors.contact}
+                  </span>
+                )}
               </div>
               {/* Message */}
               <div className="flex flex-col gap-1.5">
                 <Label className="text-sm font-['Libre_Baskerville'] text-slate-900 leading-tight">
-                  Message*
+                  Message* ({form.message.length}/1200)
                 </Label>
                 <Textarea
                   placeholder="Écrivez votre message ici ou envoyez-moi un e-mail indiqué dans le footer."
-                  className="min-h-24 bg-[#a37b7360] text-xs placeholder:text-zinc-600/60 font-['Lato']"
+                  className="min-h-24 bg-[#a37b7360] text-xs placeholder:text-zinc-600/60 font-['Libre_Baskerville']"
                   value={form.message}
-                  onChange={e => setForm(f => ({ ...f, message: e.target.value }))}
+                  onChange={e => {
+                    const value = e.target.value;
+                    if (value.length <= 1200) {
+                      setForm(f => ({ ...f, message: value }));
+                      setErrors(prev => ({ ...prev, message: validateMessage(value) }));
+                    }
+                  }}
+                  maxLength={1200}
                 />
+                {errors.message && (
+                  <span className="text-xs text-red-600 font-['Libre_Baskerville']">
+                    {errors.message}
+                  </span>
+                )}
               </div>
+              {/* Submit message */}
+              {submitMessage && (
+                <div className={`text-sm font-['Libre_Baskerville'] text-center p-3 rounded ${
+                  submitMessage.includes('Merci') ? 'text-green-700 bg-green-100' : 'text-red-700 bg-red-100'
+                }`}>
+                  {submitMessage}
+                </div>
+              )}
               {/* Submit button */}
               <div className="flex justify-center">
                 <Button
                   type="submit"
-                  disabled={!isFilled}
-                  className={`w-24 h-9 text-xs font-serif text-white rounded-md transition
-                  ${isFilled ? "bg-[#5e4c5c] hover:bg-[#4a3b48]" : "bg-zinc-600/50 cursor-not-allowed"}`}
+                  disabled={!isFormValid() || isSubmitting}
+                  className={`w-24 h-9 text-xs font-['Libre_Baskerville'] text-white rounded-md transition
+                  ${isFormValid() && !isSubmitting ? "bg-[#5e4c5c] hover:bg-[#4a3b48]" : "bg-zinc-600/50 cursor-not-allowed"}`}
                 >
-                  Envoyer
+                  {isSubmitting ? "Envoi..." : "Envoyer"}
                 </Button>
               </div>
-            </div>
+            </form>
           </TabsContent>
           <TabsContent value="ai">
             <div className="text-sm font-['Libre_Baskerville'] text-slate-900 space-y-8">
@@ -100,14 +213,14 @@ export default function ContactForm() {
               <div className="flex flex-col items-center justify-center w-full max-w-xl gap-10 mt-10">
                 <Textarea
                   placeholder="Demandez ce que vous voulez sur moi"
-                  className="w-full min-h-[120px] px-4 py-2 bg-[#a37b7360] text-black placeholder:text-white-400 rounded-md border border-transparent-300 text-base shadow-md"
+                  className="w-full min-h-[120px] px-4 py-2 bg-[#a37b7360] text-black placeholder:text-white-400 rounded-md border border-transparent-300 text-base shadow-md font-['Libre_Baskerville']"
                   value={aiQuestion}
                   onChange={e => setAiQuestion(e.target.value)}
                 />
                 <Button
                   type="submit"
                   disabled={!isAiFilled}
-                  className={`bg-[#5e4c5c] text-white rounded-md px-6 py-2 text-sm font-['Times_New_Roman'] transition
+                  className={`bg-[#5e4c5c] text-white rounded-md px-6 py-2 text-sm font-['Libre_Baskerville'] transition
                   ${!isAiFilled ? "bg-zinc-600/50 cursor-not-allowed" : "hover:bg-[#4a3b48]"}`}
                 >
                   Envoyer

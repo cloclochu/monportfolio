@@ -17,7 +17,7 @@ export default function Projects() {
             className={`flex flex-col lg:flex-row gap-6 p-4 md:p-8 rounded-[32px] shadow-md min-h-[450px] ${project.bgClass}`}
           >
             {/* Text Column */}
-            <CardContent className="w-full flex flex-col gap-6 items-center justify-center">
+              <CardContent className="w-full flex flex-col gap-10 items-center pl-6 justify-center">
               <h3 className="text-lg md:text-2xl font-serif text-[#4f4f4f] text-center">
                 {project.title}
               </h3>
@@ -26,7 +26,7 @@ export default function Projects() {
               </p>
               <Button
                 asChild
-                className={`w-24 h-8 px-4 py-2 rounded-md text-xs font-['Times_New_Roman'] ${project.buttonClass}`}
+                className={`w-24 h-8 px-4 py-2 rounded-md text-lg font-['Times_New_Roman'] ${project.buttonClass}`}
               >
                 <Link href={project.link}>{project.buttonText}</Link>
               </Button>
